@@ -1,5 +1,6 @@
 function tween_GetList() {
     return [
+        { fn: null, name: "None" },
         { fn: tween_Linear, name: "Linear" },
         { fn: tween_Bounce, name: "Bounce" },
         { fn: tween_Back, name: "Back" },

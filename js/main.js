@@ -29,33 +29,24 @@ Loader
 
 const tweeners = {}
 
-function setTwenners(x, y, s) {
-    tweeners.x = x;
-    tweeners.y = y;
-    tweeners.s = s;
-}
-
-function fillTweens(element) {
+function fillTweens(element, selectedIndex) {
     const list = tween_GetList();
 
     let select = document.getElementById(element);
     for (let i = 0; i < list.length; i++) {
-        var option = document.createElement("option");
+        let option = document.createElement("option");
         option.text = list[i].name;
         select.add(option);
     }
+
+    select.selectedIndex = selectedIndex;
 }
 
-function createLine() {
-    const width = canvasSize.w - canvasSize.padding * 2;
-    const height = canvasSize.h - canvasSize.padding * 2;
-
-    line.clear();
-    line.moveTo(0, 0);
-    for (let i = 0; i <= 1.0; i += 0.01) {
-        const x = tweeners.x(i) * width;
-        const y = tweeners.y(i) * height;
-        line.lineTo(x, y);
+function getTweenValue(tween, t) {
+    if (tween.mode === 'In') {
+        return tween.fn(t);
+    } else /*if (mode === 'Out')*/ {
+        return tween.fn(1.0 - t);
     }
 }
 
@@ -63,54 +54,125 @@ let circle,
     line;
 
 function setup() {
+    let rect = new PIXI.Graphics();
+    rect.lineStyle(1, 0xFFFFFF, 1);
+    rect.moveTo(0, canvasSize.padding);
+    rect.lineTo(canvasSize.w, canvasSize.padding);
+    rect.moveTo(0, canvasSize.h - canvasSize.padding);
+    rect.lineTo(canvasSize.w, canvasSize.h - canvasSize.padding);
+    rect.moveTo(canvasSize.padding, 0);
+    rect.lineTo(canvasSize.padding, canvasSize.h);
+    rect.moveTo(canvasSize.w - canvasSize.padding, 0);
+    rect.lineTo(canvasSize.w - canvasSize.padding, canvasSize.h);
+    app.stage.addChild(rect);
+
     line = new PIXI.Graphics();
-    line.lineStyle(2, 0xFFFFFF, 1);
+    line.lineStyle(4, 0xFFFF50, 1);
     app.stage.addChild(line);
 
-    fillTweens("tween_x");
-    fillTweens("tween_y");
-    fillTweens("tween_s");
+    fillTweens("tween_x", 1);
+    fillTweens("tween_y", 3);
+    fillTweens("tween_s", 0);
     updateTweens();
 
     circle = new PIXI.Sprite(Loader.resources["images/circle.png"].texture);
     circle.anchor.set(0.5, 0.5);
     app.stage.addChild(circle);
 
-    app.ticker.add(delta => gameLoop(delta));
+    app.ticker.add(dt => gameLoop(dt));
 
 }
 
 function updateTweens() {
     const list = tween_GetList();
-    let tween_x = document.getElementById("tween_x");
-    let tween_y = document.getElementById("tween_y");
-    let tween_s = document.getElementById("tween_s");
-    setTwenners(
-        list[tween_x.selectedIndex].fn,
-        list[tween_y.selectedIndex].fn,
-        list[tween_s.selectedIndex].fn);
+
+    const x = document.getElementById("tween_x");
+    const x_fn = list[x.selectedIndex].fn;
+    if (x_fn) {
+        const mode = document.getElementById("tween_x_mode");
+        tweeners.x = {
+            fn: x_fn,
+            mode: mode.options[mode.selectedIndex].text
+        };
+    } else {
+        tweeners.x = null;
+    }
+
+    const y = document.getElementById("tween_y");
+    const y_fn = list[y.selectedIndex].fn;
+    if (y_fn) {
+        const mode = document.getElementById("tween_y_mode");
+        tweeners.y = {
+            fn: y_fn,
+            mode: mode.options[mode.selectedIndex].text
+        };
+    } else {
+        tweeners.y = null;
+    }
+
+    const s = document.getElementById("tween_s");
+    const s_fn = list[s.selectedIndex].fn;
+    if (s_fn) {
+        const mode = document.getElementById("tween_s_mode");
+        tweeners.s = {
+            fn: s_fn,
+            mode: mode.options[mode.selectedIndex].text
+        };
+    } else {
+        tweeners.s = null;
+    }
 
     createLine();
 }
 
-let time = 0.0;
-
-function gameLoop(delta) {
-    let t = time <= 1.0 ? time : 1.0;
-
-    line.x = canvasSize.padding;
-    line.y = canvasSize.padding;
-
+function createLine() {
     const width = canvasSize.w - canvasSize.padding * 2;
     const height = canvasSize.h - canvasSize.padding * 2;
 
-    circle.x = canvasSize.padding + tweeners.x(t) * width;
-    circle.y = canvasSize.padding + tweeners.y(t) * height;
-    const s = 0.25 + 0.75 * tweeners.s(t);
-    circle.scale.set(s, s);
+    line.clear();
 
-    time += delta * 0.01;
-    if (time >= 1.0) {
-        time = 0.0;
+    const count = 100;
+    for (let i = 0; i <= count; i++) {
+        const t = i / count;
+        let x = canvasSize.padding;
+        if (tweeners.x) {
+            x += getTweenValue(tweeners.x, t) * width;
+        }
+
+        let y = canvasSize.padding;
+        if (tweeners.y) {
+            y += getTweenValue(tweeners.y, t) * height;
+        }
+
+        if (i == 0) {
+            line.moveTo(x, y);
+        } else {
+            line.lineTo(x, y);
+        }
     }
+}
+
+let time = 0.0;
+
+function gameLoop(dt) {
+    time = (time + dt * 0.005) % 1;
+    const t = time;
+
+    circle.x = canvasSize.padding;
+    if (tweeners.x) {
+        let width = canvasSize.w - canvasSize.padding * 2;
+        circle.x += getTweenValue(tweeners.x, t) * width;
+    }
+
+    circle.y = canvasSize.padding;
+    if (tweeners.y) {
+        let height = canvasSize.h - canvasSize.padding * 2;
+        circle.y += getTweenValue(tweeners.y, t) * height;
+    }
+
+    let s = 0.5;
+    if (tweeners.s) {
+        s += 0.5 * getTweenValue(tweeners.s, t);
+    }
+    circle.scale.set(s, s);
 }

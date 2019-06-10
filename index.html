@@ -10,27 +10,25 @@
 
 <body>
     <form id="form">
-        <label>X:</label> <select id="tween_x"></select>
-        <select id="tween_x_mode">
+        <label>X:</label> <select id="tween_x" onchange="updateTweens()"></select>
+        <select id="tween_x_mode" onchange="updateTweens()">
             <option>In</option>
             <option>Out</option>
             <option>InOut</option>
         </select>
-        <label>Y:</label> <select id="tween_y"></select>
-        <select id="tween_y_mode">
-            <option>In</option>
-            <option>Out</option>
-            <option>InOut</option>
-        </select>
-        <br />
-        <label>S:</label> <select id="tween_s"></select>
-        <select id="tween_s_mode">
+        <label>Y:</label> <select id="tween_y" onchange="updateTweens()"></select>
+        <select id="tween_y_mode" onchange="updateTweens()">
             <option>In</option>
             <option>Out</option>
             <option>InOut</option>
         </select>
         <br />
-        <button type="button" onclick="updateTweens()">Update</button>
+        <label>S:</label> <select id="tween_s" onchange="updateTweens()"></select>
+        <select id="tween_s_mode" onchange="updateTweens()">
+            <option>In</option>
+            <option>Out</option>
+            <option>InOut</option>
+        </select>
     </form>
 
     <script src="js/main.js"></script>

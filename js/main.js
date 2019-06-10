@@ -43,7 +43,8 @@ function getTweenValue(tween, t) {
 }
 
 let circle,
-    line;
+    line,
+    message;
 
 function setup() {
     let rect = new PIXI.Graphics();
@@ -74,8 +75,15 @@ function setup() {
     circle.endFill();
     app.stage.addChild(circle);
 
-    app.ticker.add(dt => gameLoop(dt));
+    message = new PIXI.Text("0.0");
+    message.style = {
+        fill: "white",
+        font: "16px"
+    };
+    message.position.set(10, 10);
+    app.stage.addChild(message);
 
+    app.ticker.add(dt => gameLoop(dt));
 }
 
 setup();
@@ -154,6 +162,7 @@ let time = 0.0;
 function gameLoop(dt) {
     time = (time + dt * 0.005) % 1;
     const t = time;
+    message.text = (time * 100).toFixed(0) + "%";
 
     circle.x = canvasSize.padding;
     if (tweeners.x) {

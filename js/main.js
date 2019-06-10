@@ -37,8 +37,16 @@ function fillTweens(element, selectedIndex) {
 function getTweenValue(tween, t) {
     if (tween.mode === 'In') {
         return tween.fn(t);
-    } else /*if (mode === 'Out')*/ {
-        return tween.fn(1.0 - t);
+    } else if (tween.mode === 'Out') {
+        return 1.0 - tween.fn(1.0 - t);
+    } else {
+        if (t < 0.5) {
+            return tween.fn(2.0 * t) * 0.5;
+        }
+        else
+        {
+            return 0.5 + (1.0 - tween.fn(1.0 - (2.0 * t - 1.0))) * 0.5;
+        }
     }
 }
 

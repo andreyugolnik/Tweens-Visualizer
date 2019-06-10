@@ -19,14 +19,6 @@ let app = new PIXI.Application({
 document.body.appendChild(app.view);
 // console.log("size: " + app.renderer.view.width + " x " + app.renderer.view.height);
 
-let Loader = PIXI.Loader.shared;
-
-Loader
-    .add([
-        "images/circle.png"
-    ])
-    .load(setup);
-
 const tweeners = {}
 
 function fillTweens(element, selectedIndex) {
@@ -55,7 +47,7 @@ let circle,
 
 function setup() {
     let rect = new PIXI.Graphics();
-    rect.lineStyle(1, 0xFFFFFF, 1);
+    rect.lineStyle(1, 0xffffff, 1);
     rect.moveTo(0, canvasSize.padding);
     rect.lineTo(canvasSize.w, canvasSize.padding);
     rect.moveTo(0, canvasSize.h - canvasSize.padding);
@@ -75,13 +67,18 @@ function setup() {
     fillTweens("tween_s", 0);
     updateTweens();
 
-    circle = new PIXI.Sprite(Loader.resources["images/circle.png"].texture);
-    circle.anchor.set(0.5, 0.5);
+    circle = new PIXI.Graphics();
+    circle.beginFill(0xffc20c);
+    circle.lineStyle(4, 0xffffff, 1);
+    circle.drawCircle(0, 0, 15);
+    circle.endFill();
     app.stage.addChild(circle);
 
     app.ticker.add(dt => gameLoop(dt));
 
 }
+
+setup();
 
 function updateTweens() {
     const list = tween_GetList();
